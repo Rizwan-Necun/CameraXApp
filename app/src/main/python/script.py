@@ -96,7 +96,7 @@ def process_and_enhance_image(image_path,output_path):
         dilated_img = cv2.dilate(plane, np.ones((7, 7), np.uint8))
         bg_img = cv2.medianBlur(dilated_img, 21)
         diff_img = 255 - cv2.absdiff(plane, bg_img)
-        norm_img = cv2.normalize(diff_img, None, alpha=10, beta=250, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8UC1)
+        norm_img = cv2.normalize(diff_img, None, alpha=0, beta=250, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8UC1)
         result_planes.append(diff_img)
         result_norm_planes.append(norm_img)
 
@@ -106,11 +106,13 @@ def process_and_enhance_image(image_path,output_path):
     # Color Enhancement
     lab = cv2.cvtColor(shadow_removal_image_norm, cv2.COLOR_BGR2LAB)
     l, a, b = cv2.split(lab)
-    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+    clahe = cv2.createCLAHE(clipLimit=1.0, tileGridSize=(8, 8))
     cl = clahe.apply(l)
     limg = cv2.merge((cl, a, b))
     enhanced_img = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
-    brightness = 30
+    # brightness = 30
+    # contrast = 60
+    brightness = 40
     contrast = 60
     dummy = np.int16(enhanced_img)
     dummy = dummy * (contrast/127+1) - contrast + brightness
@@ -121,6 +123,7 @@ def process_and_enhance_image(image_path,output_path):
     s = cv2.add(s, 20)
     enhanced_img = cv2.merge([h, s, v])
     enhanced_img = cv2.cvtColor(enhanced_img, cv2.COLOR_HSV2BGR)
+
 
     if not os.path.exists(output_path):
         os.makedirs(output_path)
